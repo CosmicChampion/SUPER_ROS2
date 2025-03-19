@@ -436,7 +436,7 @@ namespace rog_map {
             visualization_msgs::Marker marker_ball;
             static int cnt = 0;
             Vec3f cur_pos = pt;
-            if (isnan(pt.x()) || isnan(pt.y()) || isnan(pt.z())) {
+            if (std::isnan(pt.x()) || std::isnan(pt.y()) || std::isnan(pt.z())) {
                 return;
             }
             marker_ball.header.frame_id = "world";

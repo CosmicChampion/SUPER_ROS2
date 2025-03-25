@@ -26,7 +26,6 @@
 
 #include "Eigen/Dense"
 #include "vector"
-#include "rog_map_ros/rog_map_ros1.hpp"
 #include "rog_map_ros/rog_map_ros2.hpp"
 #include "queue"
 #include "path_search/config.hpp"

@@ -1,7 +1,7 @@
 fsm:
   click_goal_en: true
   click_goal_topic: "/goal_pose"
-  click_height: 1.5
+  click_height: 1
   click_yaw_en: true
   replan_rate: 15.0
   cmd_topic: "/planning/pos_cmd"
@@ -97,7 +97,7 @@ traj_opt:
 
 astar:
   map_voxel_num: [ 500, 500, 100 ]
-  visual_process: false
+  visual_process: true
   allow_diag: true
   # 0 DIAG; 1 MANHATTAN; 2 EUCLIDEAN
   heu_type: 2

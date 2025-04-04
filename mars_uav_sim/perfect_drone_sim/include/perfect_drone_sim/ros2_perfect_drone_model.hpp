@@ -149,19 +149,35 @@ namespace perfect_drone {
         double getSensingRate() {
             return cfg_.sensing_rate;
         }
-
-
         void publishPC() {
             pcl::PointCloud<marsim::PointType>::Ptr local_map(new pcl::PointCloud<marsim::PointType>);
             const auto cur_t = this->get_clock()->now().seconds();
+            
+            // Рендеринг карти місця (наприклад, з поточною позицією і орієнтацією)
             render_ptr_->renderOnceInWorld(position_.cast<float>(), q_.cast<float>(), cur_t, local_map);
+            
+            // Додаємо точки 
+            float ceiling_height = 1.6; // Висота  в метрах (можна змінювати)
+            
+            // Додаємо точки , які слідують за дроном
+            for (const auto& point : local_map->points) {
+                marsim::PointType ceiling_point;
+                ceiling_point.x = point.x;
+                ceiling_point.y = point.y;
+                ceiling_point.z = point.z + ceiling_height; 
+                local_map->points.push_back(ceiling_point); // Додаємо точку в хмару
+            }
+        
+            // Перетворюємо pcl::PointCloud в повідомлення ROS
             sensor_msgs::msg::PointCloud2 pc_msg;
             pcl::toROSMsg(*local_map, pc_msg);
             pc_msg.header.frame_id = "world";
             pc_msg.header.stamp = this->get_clock()->now();
+        
             std::cout << "Publish local map size: " << local_map->size() << std::endl;
             local_pc_pub_->publish(pc_msg);
         }
+        
 
         ~PerfectDrone() {}
 

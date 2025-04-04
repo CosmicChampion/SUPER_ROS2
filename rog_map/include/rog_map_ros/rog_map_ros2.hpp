@@ -35,6 +35,11 @@
 #include <rog_map/rog_map.h>
 #include <super_utils/color_msg_utils.hpp>
 
+//new include
+#include <pcl/io/pcd_io.h>
+#include <pcl/conversions.h>
+#include <sensor_msgs/msg/point_cloud2.hpp>
+
 namespace rog_map {
     using namespace super_utils;
 
@@ -149,7 +154,7 @@ namespace rog_map {
 
             writeTimeConsumingToLog(time_log_file_);
         }
-
+        int counter = 0;
         void vizCallback() {
             if (!cfg_.visualization_en) {
                 return;
@@ -195,9 +200,17 @@ namespace rog_map {
             sensor_msgs::msg::PointCloud2 cloud_msg;
 
             if (vm_.occ_pub->get_subscription_count() >= 1) {
+                counter++;
                 boxSearch(box_min, box_max, OCCUPIED, occ_map);
                 vecEVec3fToPC2(occ_map, cloud_msg);
                 vm_.occ_pub->publish(cloud_msg);
+                //try to save occ_map
+                if(counter % 10 == 0){
+                    std::string file_name = "file.pcd";  // file path
+                    saveCloudMsgToPCD(cloud_msg, file_name);
+                    cout << YELLOW << " -- [ROGMap] SAVE FILE." << endl;
+                }
+
             }
 
             if (vm_.occ_inf_pub->get_subscription_count() >= 1) {
@@ -359,6 +372,18 @@ namespace rog_map {
                 );
             }
         }
+
+        void saveCloudMsgToPCD(const sensor_msgs::msg::PointCloud2& cloud_msg, const std::string& file_path) {
+            pcl::PointCloud<pcl::PointXYZ>::Ptr pcl_cloud(new pcl::PointCloud<pcl::PointXYZ>);
+            
+            // Конвертуємо PointCloud2 у pcl::PointCloud<pcl::PointXYZ>
+            pcl::fromROSMsg(cloud_msg, *pcl_cloud);
+        
+            // Зберігаємо точкову хмару у файл PCD
+            pcl::io::savePCDFile(file_path, *pcl_cloud);
+            std::cout << "Point cloud saved to: " << file_path << std::endl;
+        }
+        
 
     private:
         static void visualizeBoundingBox(visualization_msgs::msg::MarkerArray& mkrarr,

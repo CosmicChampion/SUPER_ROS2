@@ -100,6 +100,9 @@ namespace traj_opt {
             int temporalDim, spatialDim;
 
             VecDf penalty_log;
+            bool enforce_height_penalty{true};
+            double target_z{0.2};               // бажана висота
+            double weight_z_penalty{100.0};
         } opt_vars;
 
         static double costFunctional(void *ptr,

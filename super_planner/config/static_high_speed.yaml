@@ -1,7 +1,7 @@
 fsm:
   click_goal_en: true
   click_goal_topic: "/planning/click_goal"
-  click_height: 1.5
+  click_height: 2
   click_yaw_en: true
   replan_rate: 15.0
   cmd_topic: "/planning/pos_cmd"
@@ -24,10 +24,10 @@ super_planner:
   iris_iter_num: 2
   obs_skip_num: 2
   replan_forward_dt: 0.1
-  planning_horizon: 30.0
+  planning_horizon: 10.0
   sensing_horizon: -1
   receding_dis: 15.0
-  robot_r: 0.2
+  robot_r: 0
   yaw_dot_max: 3.0
   # Yaw mode: 1 heading to velocity, 2 heading to goal
   yaw_mode: 1
@@ -116,7 +116,7 @@ rog_map:
   frontier_extraction_en: false
 
   # Virtual ceil and ground
-  virtual_ceil_height: 5
+  virtual_ceil_height: 2.7
   virtual_ground_height: -0.5
 
   load_pcd_en: false
@@ -186,4 +186,3 @@ rog_map:
     #             the cell will be considered as unknown.
     # in all, 1.0 is more aggressive while 0.0 is more conservative.
     unk_thresh: 1.0
-

@@ -200,8 +200,8 @@ namespace super_planner {
         box_max = p1.cwiseMax(p2);
         box_min -= Vec3f(bound_dis_, bound_dis_, bound_dis_);
         box_max += Vec3f(bound_dis_, bound_dis_, bound_dis_);
-//        box_min.z() = std::max(box_min.z(), virtual_groud_height_);
-//        box_max.z() = std::min(box_max.z(), virtual_ceil_height_);
+        box_min.z() = std::max(box_min.z(), virtual_groud_height_);
+        box_max.z() = std::min(box_max.z(), virtual_ceil_height_);
     }
 
     bool CorridorGenerator::GeneratePolytopeFromPoint(const Vec3f &pt, Polytope &polytope) {

@@ -268,6 +268,11 @@ double ExpTrajOpt::costFunctional(void *ptr,
     const auto &penaltyWeights = obj.penaltyWeights;
     const auto &block_energy_cost = obj.block_energy_cost;
 
+    const auto &enforce_height_penalty = obj.enforce_height_penalty;
+    const auto &target_z = obj.target_z;
+    const auto &weight_z_penalty = obj.weight_z_penalty;
+
+
     auto &quadrotor_flatness = obj.quadrotor_flatness;
 
     obj.iter_num++;
@@ -339,6 +344,23 @@ double ExpTrajOpt::costFunctional(void *ptr,
             gcopter::normRetrictionLayer(xi, vPolyIdx, vPolytopes, cost, gradXi);
             break;
         }
+    }
+        
+    /* 7) Optional height penalty */
+    if (enforce_height_penalty) {
+        double z_cost = 0.0;
+        Mat3Df gradZ = Mat3Df::Zero(3, points.cols());
+    
+        for (int i = 0; i < points.cols(); ++i) {
+            double dz = points(2, i) - target_z;
+            z_cost += dz * dz;
+            gradZ(2, i) = 2.0 * dz;  // ∂(dz²)/∂z = 2*dz
+        }
+    
+        cost += weight_z_penalty * z_cost;
+    
+        // Додаємо градієнт штрафу за висоту
+        gradByPoints += weight_z_penalty * gradZ;
     }
     return cost;
 }

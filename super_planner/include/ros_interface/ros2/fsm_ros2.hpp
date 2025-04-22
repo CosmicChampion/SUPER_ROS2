@@ -22,7 +22,6 @@
 */
 
 
-#ifdef USE_ROS2
 
 #ifndef SRC_FSM_ROS2_HPP
 #define SRC_FSM_ROS2_HPP
@@ -400,5 +399,3 @@ namespace fsm {
 }
 
 #endif //SRC_FSM_ROS1_HPP
-
-#endif

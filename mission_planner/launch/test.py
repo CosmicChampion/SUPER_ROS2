@@ -55,21 +55,14 @@ def generate_launch_description():
     ld.add_action(declare_config_path_cmd)
     ld.add_action(declare_data_path_cmd)
 
-    ldlidar = IncludeLaunchDescription(
+    livox = IncludeLaunchDescription(
         launch_description_source=PythonLaunchDescriptionSource([
-            get_package_share_directory('ldlidar_node'),
-            '/launch/ldlidar_rviz2.launch.py'
+            get_package_share_directory('livox_ros_driver2'),
+            '/launch_ROS2/rviz_MID360_launch.py'
         ])
     )
-    ld.add_action(ldlidar)
+    ld.add_action(livox)
 
-    ldlidar_tool = IncludeLaunchDescription(
-        launch_description_source=PythonLaunchDescriptionSource([
-            get_package_share_directory('points_cloud_tool'),
-            '/launch/pc2_launch.py'
-        ])
-    )
-    ld.add_action(ldlidar_tool)
 
     rviz_node2 = Node(
         package='rviz2',

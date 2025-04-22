@@ -22,6 +22,8 @@
 */
 
 #include <rog_map/prob_map.h>
+
+
 using namespace rog_map;
 using namespace super_utils;
 
@@ -90,7 +92,9 @@ void ProbMap::initProbMap() {
     printMapInformation();
 }
 
-Vec3f ProbMap::getLocalMapOrigin() const {
+
+Vec3f ProbMap::getLocalMapOrigin() const
+{
     return local_map_origin_d_;
 }
 

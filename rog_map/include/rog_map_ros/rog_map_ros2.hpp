@@ -200,7 +200,9 @@ namespace rog_map {
                 vm_.occ_pub->publish(cloud_msg);
             }
 
-            if (vm_.occ_inf_pub->get_subscription_count() >= 1) {
+
+
+            if (true || vm_.occ_inf_pub->get_subscription_count() >= 1) {
                 boxSearchInflate(box_min, box_max, OCCUPIED, inf_occ_map);
                 vecEVec3fToPC2(inf_occ_map, cloud_msg);
                 cloud_msg.header.stamp = nh_->get_clock()->now();
@@ -477,7 +479,7 @@ namespace rog_map {
             visualization_msgs::msg::Marker marker_ball;
             static int cnt = 0;
             Vec3f cur_pos = pt;
-            if (std::isnan(pt.x()) || std::isnan(pt.y()) || std::isnan(pt.z())) {
+            if (isnan(pt.x()) || isnan(pt.y()) || isnan(pt.z())) {
                 return;
             }
             marker_ball.header.frame_id = "world";
@@ -529,4 +531,3 @@ namespace rog_map {
     };
 }
 #endif // ROG_MAP_ROS_HPP
-

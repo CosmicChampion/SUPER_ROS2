@@ -40,7 +40,7 @@ traj_opt:
     print_optimizer_log: false
 
   boundary:
-    max_vel: 25.0
+    max_vel: 5.0
     max_acc: 20.0
     max_jerk: 120.0
     max_omg: 5
@@ -128,7 +128,7 @@ rog_map:
 
   esdf:
     enable: false
-    resolution: 0.1
+    resolution: 0.3
     # The range of esdf around the odom [m].
     local_update_box: [ 5,5,3 ]
 

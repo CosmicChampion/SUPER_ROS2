@@ -46,6 +46,8 @@ namespace rog_map {
 
         void initProbMap();
 
+
+
         bool isOccupied(const Vec3f &pos) const;
 
         bool isUnknown(const Vec3f &pos) const;

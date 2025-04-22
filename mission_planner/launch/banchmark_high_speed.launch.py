@@ -14,7 +14,7 @@ def generate_launch_description():
     package_path = get_package_share_directory('perfect_drone_sim')
 
     default_rviz_config_path = os.path.join(
-        package_path, 'rviz2', 'fpv.rviz')
+        package_path, 'rviz2', '1.rviz')
 
     default_config_path = 'waypoint.yaml'
     default_data_path =  'benchmark.txt'

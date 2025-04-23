@@ -46,6 +46,7 @@ find_package(nav_msgs REQUIRED)
 find_package(visualization_msgs REQUIRED)
 find_package(PCL REQUIRED)
 find_package(pcl_conversions REQUIRED)
+find_package(px4_msgs REQUIRED)
 
 
 set(includes
@@ -74,6 +75,7 @@ set(ros_libs
         rog_map
         tf2_ros
         pcl_conversions
+        px4_msgs
 
 )
 

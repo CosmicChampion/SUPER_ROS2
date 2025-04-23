@@ -37,6 +37,10 @@
 #include "mars_quadrotor_msgs/msg/position_command.hpp"
 #include "mars_quadrotor_msgs/msg/polynomial_trajectory.hpp"
 
+#include <px4_msgs/msg/trajectory_setpoint.hpp>
+#include <px4_msgs/msg/offboard_control_mode.hpp>
+#include <px4_msgs/msg/vehicle_command.hpp>
+
 
 namespace fsm {
     class FsmRos2 : public Fsm {
@@ -56,6 +60,14 @@ namespace fsm {
         nav_msgs::msg::Path path;
 
         vector<mars_quadrotor_msgs::msg::PositionCommand> cmd_logs_;
+        //px4 command
+        px4_msgs::msg::TrajectorySetpoint traj_; 
+        px4_msgs::msg::OffboardControlMode offboard_msg;
+        //PX4 Publishers
+        rclcpp::Publisher<px4_msgs::msg::TrajectorySetpoint>::SharedPtr traj_pub_;
+        rclcpp::Publisher<px4_msgs::msg::OffboardControlMode>::SharedPtr ctrl_mode_pub_;
+        rclcpp::Publisher<px4_msgs::msg::VehicleCommand>::SharedPtr vehicle_cmd_pub_;
+        
 
         void resetVisualizedPath() override {
             path.poses.clear();
@@ -174,6 +186,62 @@ namespace fsm {
             pos_cmd.thrust.z = aT;
             latest_cmd = pos_cmd;
             cmd_logs_.push_back(latest_cmd);
+        }
+
+        void getOneTrajectorySetpoint(px4_msgs::msg::TrajectorySetpoint &traj, bool &traj_finish) {
+            StatePVAJ pvaj;
+            double yaw, yaw_dot;
+            bool on_backup_traj;
+            planner_ptr_->getOneCommandFromTraj(pvaj, yaw, yaw_dot, on_backup_traj, traj_finish);
+        
+            auto now = nh_  ->get_clock()->now();
+            traj.timestamp = now.nanoseconds() / 1000;
+        
+            traj.position[0] = -pvaj(0, 0);  // x
+            traj.position[1] =  pvaj(1, 0);  // y
+            traj.position[2] = -pvaj(2, 0) - 2;  // z 
+        
+            traj.velocity[0] = -pvaj(0, 1);
+            traj.velocity[1] =  pvaj(1, 1);
+            traj.velocity[2] =  pvaj(2, 1);
+        
+            traj.acceleration[0] = -pvaj(0, 2);
+            traj.acceleration[1] =  pvaj(1, 2);
+            traj.acceleration[2] =  pvaj(2, 2);
+        
+            if (std::abs(traj.velocity[0]) > 1e-2 || std::abs(traj.velocity[1]) > 1e-2) {
+                traj.yaw = std::atan2(traj.velocity[1], traj.velocity[0]);
+            }
+            traj.yawspeed = yaw_dot;
+        }
+        
+        void getOneOffboardControlModeMsg(px4_msgs::msg::OffboardControlMode &offboard_msg) {
+
+            auto now = nh_->get_clock()->now();
+            offboard_msg.timestamp = now.nanoseconds() / 1000;
+    
+            offboard_msg.position = true;
+            offboard_msg.velocity = true;
+            offboard_msg.acceleration = true;
+            offboard_msg.attitude = false;
+            offboard_msg.body_rate = false;
+        }
+
+        void sendVehicleCommand(uint16_t command, float param1 = 0.0, float param2 = 0.0) {
+            px4_msgs::msg::VehicleCommand msg;
+            auto now = nh_->get_clock()->now();
+            msg.timestamp = now.nanoseconds() / 1000;
+    
+            msg.param1 = param1;
+            msg.param2 = param2;
+            msg.command = command;
+            msg.target_system = 1;
+            msg.target_component = 1;
+            msg.source_system = 1;
+            msg.source_component = 1;
+            msg.from_external = true;
+    
+            vehicle_cmd_pub_->publish(msg);
         }
 
     public:
@@ -298,6 +366,13 @@ namespace fsm {
             mpc_cmd_pub_ = nh_->create_publisher<mars_quadrotor_msgs::msg::PolynomialTrajectory>(cfg_.mpc_cmd_topic,
                                                                                                  qos);
             path_pub_ = nh_->create_publisher<nav_msgs::msg::Path>("fsm/path", qos);
+            //PX4 Publishers
+            traj_pub_ = nh_->create_publisher<px4_msgs::msg::TrajectorySetpoint>("/fmu/in/trajectory_setpoint", qos);  
+            ctrl_mode_pub_ = nh_->create_publisher<px4_msgs::msg::OffboardControlMode>("/fmu/in/offboard_control_mode", qos);
+            vehicle_cmd_pub_ = nh_->create_publisher<px4_msgs::msg::VehicleCommand>("/fmu/in/vehicle_command", qos);
+
+            sendVehicleCommand(px4_msgs::msg::VehicleCommand::VEHICLE_CMD_DO_SET_MODE, 1.0, 6.0); 
+            sendVehicleCommand(px4_msgs::msg::VehicleCommand::VEHICLE_CMD_COMPONENT_ARM_DISARM, 1.0);
 
             int cmd_cnt = 0;
 
@@ -370,13 +445,17 @@ namespace fsm {
             if (machine_state_ != FOLLOW_TRAJ && machine_state_ != EMER_STOP) {
                 return;
             }
-
-
             mars_quadrotor_msgs::msg::PolynomialTrajectory heartbeat;
             getOneHeartBeatMsg(heartbeat, traj_finish_);
             getOnePositionCommand(pid_cmd_, traj_finish_);
+            getOneTrajectorySetpoint(traj_, traj_finish_);
             mpc_cmd_pub_->publish(heartbeat);
             cmd_pub_->publish(pid_cmd_);
+
+            traj_pub_->publish(traj_);
+            getOneOffboardControlModeMsg(offboard_msg);
+            ctrl_mode_pub_->publish(offboard_msg);
+
             if (traj_finish_) {
                 cout << GREEN << " -- [Fsm] Traj finish." << RESET << endl;
                 if (closeToGoal(0.1)) {
@@ -398,4 +477,4 @@ namespace fsm {
     };
 }
 
-#endif //SRC_FSM_ROS1_HPP
+#endif 

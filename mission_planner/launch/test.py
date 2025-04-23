@@ -16,7 +16,7 @@ def generate_launch_description():
     package_path = get_package_share_directory('perfect_drone_sim')
 
     default_rviz_fpv_config_path = os.path.join(
-        package_path, 'rviz2', 'test.rviz')
+        package_path, 'rviz2', 'fpv.rviz')
 
     default_config_path = 'waypoint.yaml'
     default_data_path =  'benchmark.txt'
@@ -72,15 +72,15 @@ def generate_launch_description():
     )
     ld.add_action(rviz_node2)
 
-    # perfect_drone_sim = Node(
-    #     package='perfect_drone_sim',
-    #     executable='perfect_drone_node',
-    #     output='log',
-    #     parameters=[{
-    #         'config_name': perfect_drone_sim_config_name,
-    #     }]
-    # )
-    # ld.add_action(perfect_drone_sim)
+    perfect_drone_sim = Node(
+        package='perfect_drone_sim',
+        executable='perfect_drone_node',
+        output='log',
+        parameters=[{
+            'config_name': perfect_drone_sim_config_name,
+        }]
+    )
+    ld.add_action(perfect_drone_sim)
 
     SUPER = Node(
         package='super_planner',
